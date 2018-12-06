@@ -47,11 +47,11 @@ def main():
         optimizer.step()
         if epoch % 500 == 0:
             print(epoch, loss.data.tolist())
-            validate(model, x_test, x_data, y_data, epoch//1000,
+            validate(model, x_test, x_data, y_data, epoch//500, loss.data.numpy(),
                      savefig=True)
 
 
-def validate(model, x_test, x_data, y_data, epoch, savefig=False):
+def validate(model, x_test, x_data, y_data, epoch, loss, savefig=False):
     model.eval()
     pi, mu, sigma = model(x_test)
     # print(pi, mu, sigma)
@@ -62,12 +62,13 @@ def validate(model, x_test, x_data, y_data, epoch, savefig=False):
 
     # plot the figures
     color_list = ['r', 'b', 'g', 'k', 'y']
-    plt.figure(figsize=(24, 14))
+    plt.figure(figsize=(12, 7))
     plt.subplot(231)
     plt.scatter(x_data, y_data, alpha=0.4)
     plt.xlabel('Training Data', fontsize=15)
 
     plt.subplot(232)
+    plt.title('Epoch: %.1fk, Loss:%.4f' % (epoch / 2., loss), fontsize=16)
     plt.scatter(x_data, y_data, alpha=0.4)
     plt.scatter(x_test, y_pred, alpha=0.4, color='red')
     plt.xlabel('Predicted Results', fontsize=15)
@@ -112,7 +113,8 @@ def validate(model, x_test, x_data, y_data, epoch, savefig=False):
 
     plt.tight_layout()
     if savefig:
-        plt.savefig('epoch:%dk' % epoch, dpi=300)
+        plt.savefig('epoch:%.1fk.png' % (epoch/2.), dpi=200)
+        plt.close()
     # plt.show()
 
 
