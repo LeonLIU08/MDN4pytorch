@@ -48,7 +48,7 @@ def main():
         if epoch % 500 == 0:
             print(epoch, loss.data.tolist())
             validate(model, x_test, x_data, y_data, epoch//500, loss.data.numpy(),
-                     savefig=True)
+                     savefig=False)
 
 
 def validate(model, x_test, x_data, y_data, epoch, loss, savefig=False):
@@ -61,7 +61,7 @@ def validate(model, x_test, x_data, y_data, epoch, loss, savefig=False):
     # print(k)
 
     # plot the figures
-    color_list = ['r', 'b', 'g', 'k', 'y']
+    color_list = ['r-', 'b-', 'g-', 'k-', 'y-', 'm-', 'c-', 'r--']
     plt.figure(figsize=(12, 7))
     plt.subplot(231)
     plt.scatter(x_data, y_data, alpha=0.4)
@@ -76,7 +76,7 @@ def validate(model, x_test, x_data, y_data, epoch, loss, savefig=False):
     plt.subplot(233)
     for i in range(n_gaussian):
         plt.plot(30.*np.arange(tes_samples)/float(tes_samples)-15.,
-                 pi.data.numpy()[:, i], color=color_list[i])
+                 pi.data.numpy()[:, i], color_list[i])
     plt.xlabel(r'$\alpha(i)$', fontsize=15)
 
     xx = np.linspace(-15, 15, n_samples)
@@ -88,7 +88,7 @@ def validate(model, x_test, x_data, y_data, epoch, loss, savefig=False):
         m = mu.data.numpy()[i]
         s = sigma.data.numpy()[i]
         out = singleGaussian(xx, m, s)
-        plt.plot(xx, out, color=color_list[i])
+        plt.plot(xx, out, color_list[i])
     plt.xlabel('x=-10', fontsize=15)
 
     plt.subplot(235)
@@ -98,7 +98,7 @@ def validate(model, x_test, x_data, y_data, epoch, loss, savefig=False):
         m = mu.data.numpy()[i]
         s = sigma.data.numpy()[i]
         out = singleGaussian(xx, m, s)
-        plt.plot(xx, out, color=color_list[i])
+        plt.plot(xx, out, color_list[i])
     plt.xlabel('x=0', fontsize=15)
 
     plt.subplot(236)
@@ -108,14 +108,15 @@ def validate(model, x_test, x_data, y_data, epoch, loss, savefig=False):
         m = mu.data.numpy()[i]
         s = sigma.data.numpy()[i]
         out = singleGaussian(xx, m, s)
-        plt.plot(xx, out, color=color_list[i])
+        plt.plot(xx, out, color_list[i])
     plt.xlabel('x=10', fontsize=15)
 
     plt.tight_layout()
     if savefig:
         plt.savefig('epoch:%.1fk.png' % (epoch/2.), dpi=200)
         plt.close()
-    # plt.show()
+    else:
+        plt.show()
 
 
 
