@@ -100,7 +100,7 @@ def torch_version():
 
     # The distribution on the variables X, Y packed into pos.
     Z = 10 * multivariate_gaussian(pos_torch, mu_torch, sigma_torch)
-    print(Z.shape)
+    print(Z)
     Z = Z.data.numpy()
     # Create a surface plot and projected filled contour plot under it.
     fig = plt.figure()
@@ -119,5 +119,5 @@ def torch_version():
 
 
 if __name__ == '__main__':
-    numpy_version()
+    # numpy_version()
     torch_version()
