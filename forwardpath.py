@@ -8,12 +8,12 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 class bivariate_gaussian(nn.Module):
-    def __init__(self, fea_size=60, scale=10):
+    def __init__(self, fea_size=60, scale=1.0):
         super(bivariate_gaussian, self).__init__()
         self.scale = scale
 
-        X = np.linspace(0, 60, fea_size)
-        Y = np.linspace(0, 60, fea_size)
+        X = np.linspace(0, 1, fea_size)
+        Y = np.linspace(0, 1, fea_size)
         X, Y = np.meshgrid(X, Y)
         self.pos = np.empty(X.shape + (2,))
         self.pos[:, :, 0] = X
@@ -49,9 +49,13 @@ class bivariate_gaussian(nn.Module):
         return torch.exp(-fac / 2) / N
 
 
+mu1, mu2 = 0.5, 0.3
+sig1, sig2 = 0.1, 0.3
+ro1, ro2 = 0.1, 0.5
 net = bivariate_gaussian()
-mu = np.array([30., 31.])
-Sigma = np.array([[20., 1.5], [10, 45]])
+mu = np.array([mu1, mu2])
+Sigma = np.array([[sig1**2,       ro1*sig1*sig2],
+                  [ro2*sig1*sig2, sig2**2]])
 x1 = Variable(torch.from_numpy(mu), requires_grad=True)
 x2 = Variable(torch.from_numpy(Sigma), requires_grad=True)
 out = net([x1, x2])
@@ -64,8 +68,8 @@ y = y.double()
 Z = out.data.numpy()
 # Create a surface plot and projected filled contour plot under it.
 N = 60
-X = np.linspace(0, 60, N)
-Y = np.linspace(0, 60, N)
+X = np.linspace(0, 1, N)
+Y = np.linspace(0, 1, N)
 X, Y = np.meshgrid(X, Y)
 
 fig = plt.figure()
@@ -76,8 +80,8 @@ ax.plot_surface(X, Y, Z, rstride=3, cstride=3, linewidth=1, antialiased=True,
 cset = ax.contourf(X, Y, Z, zdir='z', offset=-0.15, cmap=cm.viridis)
 
 # Adjust the limits, ticks and view angle
-ax.set_zlim(-0.15, 0.2)
-ax.set_zticks(np.linspace(0, 0.2, 5))
+ax.set_zlim(-0.15, 1)
+ax.set_zticks(np.linspace(0, 1, 5))
 ax.view_init(27, -21)
 
 plt.show()
