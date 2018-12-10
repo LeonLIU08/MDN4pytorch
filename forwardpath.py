@@ -49,42 +49,51 @@ class bivariate_gaussian(nn.Module):
         return torch.exp(-fac / 2) / N
 
 
-mu1, mu2 = 0.5, 0.3
-sig1, sig2 = 0.1, 0.3
-ro1, ro2 = 0.1, 0.5
-net = bivariate_gaussian()
-mu = np.array([mu1, mu2])
-Sigma = np.array([[sig1**2,       ro1*sig1*sig2],
-                  [ro2*sig1*sig2, sig2**2]])
-x1 = Variable(torch.from_numpy(mu), requires_grad=True)
-x2 = Variable(torch.from_numpy(Sigma), requires_grad=True)
-out = net([x1, x2])
-print(out.grad_fn, out.shape)
-y = torch.randn(1, 1, 1)
-y = y.double()
-# out.backward(y)
+mu1, mu2 = 0.5, 0.5  # (0, 1) tanh
+plt.figure(figsize=(12, 14))
+for i in range(16):
+    sig1, sig2 = 0.1, -0.2  # (0, 1) tanh
+    ro = -0.95+i*0.125  # (0, 1) tanh
+    net = bivariate_gaussian()
+    mu = np.array([mu1, mu2])
+    Sigma = np.array([[sig1**2,       ro*sig1*sig2],
+                      [ro*sig1*sig2,  sig2**2]])
+    x1 = Variable(torch.from_numpy(mu), requires_grad=True)
+    x2 = Variable(torch.from_numpy(Sigma), requires_grad=True)
+    out = net([x1, x2])
+    # print(out.grad_fn, out.shape)
+    # y = torch.randn(1, 1, 1)
+    # y = y.double()
+    # out.backward(y)
 
+    Z = out.data.numpy()
 
-Z = out.data.numpy()
-# Create a surface plot and projected filled contour plot under it.
-N = 60
-X = np.linspace(0, 1, N)
-Y = np.linspace(0, 1, N)
-X, Y = np.meshgrid(X, Y)
+    plt.subplot(4, 4, i+1)
+    plt.xlabel('sig1:%.3f, sig2:%.3f, ro:%.3f' % (sig1, sig2, ro))
+    plt.imshow(Z)
 
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-ax.plot_surface(X, Y, Z, rstride=3, cstride=3, linewidth=1, antialiased=True,
-                cmap=cm.viridis)
-
-cset = ax.contourf(X, Y, Z, zdir='z', offset=-0.15, cmap=cm.viridis)
-
-# Adjust the limits, ticks and view angle
-ax.set_zlim(-0.15, 1)
-ax.set_zticks(np.linspace(0, 1, 5))
-ax.view_init(27, -21)
-
+plt.tight_layout()
 plt.show()
+
+# plot 3D figure
+# Create a surface plot and projected filled contour plot under it.
+# N = 60
+# X = np.linspace(0, 1, N)
+# Y = np.linspace(0, 1, N)
+# X, Y = np.meshgrid(X, Y)
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+# ax.plot_surface(X, Y, Z, rstride=3, cstride=3, linewidth=1, antialiased=True,
+#                 cmap=cm.viridis)
+#
+# cset = ax.contourf(X, Y, Z, zdir='z', offset=-0.15, cmap=cm.viridis)
+#
+# # Adjust the limits, ticks and view angle
+# ax.set_zlim(-0.15, 1)
+# ax.set_zticks(np.linspace(0, 1, 5))
+# ax.view_init(27, -21)
+#
+# plt.show()
 
 
 
