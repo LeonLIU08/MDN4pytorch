@@ -6,26 +6,28 @@ import matplotlib.pyplot as plt
 
 torch.set_default_tensor_type('torch.FloatTensor')
 
+
 class multi_bivariate_gaussian(nn.Module):
-    def __init__(self, fea_size=60, scale=1.0, nb_gau=1):
+    def __init__(self, fea_w=60, fea_h=60, scale=1.0, nb_gau=1):
         super(multi_bivariate_gaussian, self).__init__()
         self.scale = scale
         self.nb_gau = nb_gau
-        self.fea_size = fea_size
+        self.fea_h = fea_h
+        self.fea_w = fea_w
 
-        X = np.linspace(0, 1, fea_size)
-        Y = np.linspace(0, 1, fea_size)
+        X = np.linspace(0, 1, fea_w)
+        Y = np.linspace(0, 1, fea_h)
         X, Y = np.meshgrid(X, Y)
         self.pos = np.empty(X.shape + (2,))
         self.pos[:, :, 0] = X
         self.pos[:, :, 1] = Y
         self.pos = torch.from_numpy(self.pos)
-
+        print('pos', self.pos.shape)
         self.global_pooling = nn.AdaptiveAvgPool2d(output_size=(1, 1))
 
     def forward(self, inputs):
         pos = self.pos
-        fea_map = torch.zeros((self.fea_size, self.fea_size), dtype=torch.float64)
+        fea_map = torch.zeros((self.fea_h, self.fea_w), dtype=torch.float64)
 
         for i in range(self.nb_gau):
             fea_map = fea_map + self.scale * self.multivariate_gaussian(pos, inputs[i*2], inputs[i*2+1])
@@ -60,7 +62,7 @@ plt.figure(figsize=(12, 14))
 for i in range(16):
     sig1, sig2 = 0.1, -0.2  # (0, 1) tanh
     ro = -0.95+i*0.125  # (0, 1) tanh
-    net = multi_bivariate_gaussian(nb_gau=2)
+    net = multi_bivariate_gaussian(nb_gau=2, fea_h=60, fea_w=80)
 
     mu = np.array([mu1, mu2])
     Sigma = np.array([[sig1**2,       ro*sig1*sig2],
