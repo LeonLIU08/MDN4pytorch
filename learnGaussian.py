@@ -19,15 +19,9 @@ def new_idea():
         Sigma_inv = np.linalg.inv(Sigma)
         N = np.sqrt((2 * np.pi) ** 2 * Sigma_det)
 
-        term_a = pos-mu
-        print(term_a.shape)
-        term_b = np.dot(term_a, Sigma_inv)
-        print(term_b.shape)
-        term_c = term_a*term_b
-        term_d = np.sum(term_c, axis=1)
-        print(term_d.shape)
+        fac = np.sum(np.dot((pos-mu), Sigma_inv)*(pos-mu), axis=1)
 
-        return np.exp(-term_d / 2) / N
+        return np.exp(-fac / 2) / N
 
     # Our 2-dimensional distribution will be over variables X and Y
     N = 60
@@ -135,6 +129,8 @@ def torch_version():
     pos[:, :, 0] = X
     pos[:, :, 1] = Y
 
+    pos_reshape = np.reshape(pos, (N*N, 2))
+
     mu_torch = torch.Tensor(mu)
     sigma_torch = torch.Tensor(Sigma)
     pos_torch = torch.Tensor(pos)
@@ -159,10 +155,27 @@ def torch_version():
 
         return torch.exp(-fac / 2) / N
 
+    def bivariate_gaussian(pos, mu, Sigma):
+        """
+        Get rid of the einsum function
+        """
+        pi = 3.14159265359
+
+        assert mu.shape[0] == 2
+        Sigma_det = torch.det(Sigma)
+        Sigma_inv = torch.inverse(Sigma)
+        N = torch.sqrt((2 * pi) ** 2 * Sigma_det)
+
+        fac = torch.sum(torch.mm((pos - mu), Sigma_inv) * (pos - mu), dim=1)
+
+        return torch.exp(-fac / 2) / N
+
     # The distribution on the variables X, Y packed into pos.
-    Z = 10 * multivariate_gaussian(pos_torch, mu_torch, sigma_torch)
-    print(Z)
+    pos_torch = torch.Tensor(pos_reshape)
+    Z = 10 * bivariate_gaussian(pos_torch, mu_torch, sigma_torch)
+    print(Z.shape)
     Z = Z.data.numpy()
+    Z = np.reshape(Z, (N, N))
     # Create a surface plot and projected filled contour plot under it.
     fig = plt.figure()
     ax = fig.gca(projection='3d')
@@ -180,6 +193,6 @@ def torch_version():
 
 
 if __name__ == '__main__':
-    numpy_version()
-    # torch_version()
+    # numpy_version()
+    torch_version()
     # new_idea()
